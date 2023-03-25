@@ -71,18 +71,16 @@
     rel="stylesheet"
   />
 </svelte:head>
-<main>
-  <div id="map" />
-</main>
+<div id="map" />
 
 <!------------------------------------------------------------------------------>
 <style>
   /* 画面いっぱいに地図を表示する */
   #map {
-    position: fixed;
+    /* position: fixed;
     top: 0;
-    left: 0;
-    width: 100dvw;
+    left: 0; */
+    width: 100%;
     height: 100dvh;
   }
   :global(.custom-marker) {
