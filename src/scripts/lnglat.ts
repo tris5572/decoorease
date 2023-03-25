@@ -9,10 +9,18 @@ const CLOSE_THRESHOLD = 0.00000005;
 /**
  * 直線の座標を削減する。最大で 1/max の座標数になる。
  * @param lnglat
+ * @param angle 直線と判定する角度。単位は度[deg]。
  * @param max
  * @returns
  */
-export function decreaseStraightPoint(lnglat: LngLat[], max = 5): LngLat[] {
+export function decreaseStraightPoint(
+  lnglat: LngLat[],
+  angle?: number,
+  max = 5
+): LngLat[] {
+  const threshold =
+    angle == null ? STRAIGHT_THRESHOLD : (angle * Math.PI) / 180;
+
   let i = 0;
   const output: LngLat[] = [];
   output.push(lnglat[0]);
@@ -27,7 +35,7 @@ export function decreaseStraightPoint(lnglat: LngLat[], max = 5): LngLat[] {
       const rad1 = Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat);
       const rad2 = Math.atan2(p3.lng - p1.lng, p3.lat - p1.lat);
 
-      if (Math.abs(rad1 - rad2) < STRAIGHT_THRESHOLD) {
+      if (Math.abs(rad1 - rad2) < threshold) {
         // 角度が閾値より小さいときは直線として引き続き読み飛ばす。
         // ただし j が max に達しているときはそこでひとまず完了とする。
         if (j === max) {

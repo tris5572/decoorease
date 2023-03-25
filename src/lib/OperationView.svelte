@@ -2,11 +2,17 @@
   import { decreaseClosePoint, decreaseStraightPoint } from "../scripts/lnglat";
   import { markerPoints, setMarkerPoints } from "../scripts/stores";
 
+  let straightAngle = 1;
+  let straightMax = 5;
   let closeValue = 30;
 
   // 直線部分を間引く。
   function runDecreaseStraight() {
-    const lnglat = decreaseStraightPoint($markerPoints);
+    const lnglat = decreaseStraightPoint(
+      $markerPoints,
+      straightAngle,
+      straightMax
+    );
     setMarkerPoints(lnglat, false);
   }
 
@@ -28,6 +34,16 @@
     <div class="box">
       <p class="header">直線削減</p>
       <div class="inner">
+        直線判定角度：{straightAngle.toFixed(2)}°<br />
+        <input
+          type="range"
+          min="0.01"
+          max="4"
+          step="0.01"
+          bind:value={straightAngle}
+        />
+        最大連続間引き数：{straightMax}個<br />
+        <input type="range" min="2" max="50" bind:value={straightMax} />
         <button on:click={runDecreaseStraight}>直線削減実行</button>
       </div>
     </div>
