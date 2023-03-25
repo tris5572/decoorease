@@ -3,10 +3,29 @@ import type { LngLat } from "maplibre-gl";
 import { isGpx, lnglatFromGpx } from "./gpx";
 
 /** 地図に表示する座標のリスト */
-export const markerPoints = writable<LngLat[]>([]);
+export const markerPoints = createMarkerPoints();
+
+function createMarkerPoints() {
+  const { subscribe, set, update } = writable<LngLat[]>([]);
+  return {
+    subscribe,
+    set: (v: LngLat[]) => set(v),
+    append: (v: LngLat[]) => update((a) => [...a, ...v]),
+    clear: () => set([]),
+  };
+}
 
 /** 地図を座標に合わせて拡大縮小させるかどうかのフラグ。 */
-export const fitBoundsFlag = writable(false);
+export const fitBoundsFlag = createFitBoundsFlag();
+
+function createFitBoundsFlag() {
+  const { subscribe, set, update } = writable(false);
+  return {
+    subscribe,
+    on: () => set(true),
+    off: () => set(false),
+  };
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,9 +36,9 @@ export const fitBoundsFlag = writable(false);
  */
 export function setMarkerPoints(lnglat: LngLat[], fit?: boolean) {
   if (fit === true) {
-    fitBoundsFlag.set(true);
+    fitBoundsFlag.on();
   } else {
-    fitBoundsFlag.set(false);
+    fitBoundsFlag.off();
   }
   markerPoints.set(lnglat);
 }
