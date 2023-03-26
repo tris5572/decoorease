@@ -1,5 +1,5 @@
 <script lang="ts">
-  import maplibregl, { LngLat, LngLatBounds, Map, Marker } from "maplibre-gl";
+  import maplibregl, { LngLatBounds, Map, Marker } from "maplibre-gl";
   import { onMount } from "svelte";
   import { fitBoundsFlag, markerPoints } from "../scripts/stores";
 
@@ -37,7 +37,7 @@
           .setLngLat(ll)
           .addTo(map);
         markers.push(marker);
-        bounds.extend(ll);
+        bounds.extend(ll.lnglat());
       }
 
       // 表示をフィットさせる。

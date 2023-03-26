@@ -59,13 +59,22 @@ export function isGpx(gpx: string): boolean {
   return false;
 }
 
-// 削減結果を元に、出力するGPXファイルを生成する。
-export function createOutputGpx(): string {
+/**
+ * 削減結果を元に、出力するGPXファイルを生成する。
+ * @returns GPXファイルの文字列。出力不可のときは undefined。
+ */
+export function createOutputGpx(): string | undefined {
   const parsingOptions = {
     ignoreAttributes: false,
   };
   const parser = new XMLParser(parsingOptions);
   let jsonObj = parser.parse(get(sourceGpx));
+
+  // GPXでなかったり、正常に生成できない恐れがあるときは undefined を返す。
+  if (jsonObj.gpx?.trk?.trkseg?.trkpt == null) {
+    return undefined;
+  }
+
   const outTrkpts = []; // 座標を追加したリスト
 
   // 編集後の座標のリストを生成して、読み込んだGPXデータの当該部分を上書き。

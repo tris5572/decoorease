@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createOutputGpx } from "../scripts/gpx";
   import { decreaseClosePoint, decreaseStraightPoint } from "../scripts/point";
   import { markerPoints, setMarkerPoints } from "../scripts/stores";
 
@@ -20,6 +21,26 @@
   function runDecreaseClose() {
     const lnglat = decreaseClosePoint($markerPoints, closeValue);
     setMarkerPoints(lnglat, false);
+  }
+
+  // GPXファイルをダウンロード。
+  function download() {
+    const gpx = createOutputGpx();
+    if (gpx == null) {
+      return;
+    }
+
+    const blob = new Blob([gpx], { type: "text/xml" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.setAttribute("href", url);
+    anchor.setAttribute("download", "GPX.gpx");
+    const mouseEvent = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
+    anchor.dispatchEvent(mouseEvent);
   }
 </script>
 
@@ -53,6 +74,11 @@
         間引き間隔：約{closeValue}m
         <input type="range" min="5" max="200" bind:value={closeValue} />
         <button on:click={runDecreaseClose}>近接削減実行</button>
+      </div>
+    </div>
+    <div class="box">
+      <div class="inner">
+        <button on:click={download}>GPXダウンロード</button>
       </div>
     </div>
   </div>
