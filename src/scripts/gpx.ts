@@ -1,15 +1,17 @@
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { LngLat } from "maplibre-gl";
+import { get } from "svelte/store";
+import { Point } from "./point";
+import { markerPoints, sourceGpx } from "./stores";
 
 export function updateGpxByDroppedFile() {}
 
 /**
- * GPXファイルから座標のリストを生成する。
+ * GPXファイルから座標(Point)のリストを生成する。
  * @param gpx GPXファイルの中身の文字列
  * @returns 座標のリスト。
  */
-export function lnglatFromGpx(gpx: string): LngLat[] {
-  const lnglat = [];
+export function pointsFromGpx(gpx: string): Point[] {
+  const points = [];
 
   // パース時のオプション。trkpt の lat と lon を取得するために指定。
   const parsingOptions = {
@@ -23,11 +25,12 @@ export function lnglatFromGpx(gpx: string): LngLat[] {
 
   // trkpt を座標として出力用へ格納。
   for (const a of array) {
-    // lnglat.push([Number(a["@_lat"]), Number(a["@_lon"])]);
-    lnglat.push(new LngLat(Number(a["@_lon"]), Number(a["@_lat"])));
+    points.push(
+      new Point(Number(a["@_lon"]), Number(a["@_lat"]), Number(a["ele"]))
+    );
   }
 
-  return lnglat;
+  return points;
 }
 
 /**
@@ -54,4 +57,33 @@ export function isGpx(gpx: string): boolean {
 
   console.log("GPXファイルではないと判定されました。");
   return false;
+}
+
+// 削減結果を元に、出力するGPXファイルを生成する。
+export function createOutputGpx(): string {
+  const parsingOptions = {
+    ignoreAttributes: false,
+  };
+  const parser = new XMLParser(parsingOptions);
+  let jsonObj = parser.parse(get(sourceGpx));
+  const outTrkpts = []; // 座標を追加したリスト
+
+  // 編集後の座標のリストを生成して、読み込んだGPXデータの当該部分を上書き。
+  for (const v of get(markerPoints)) {
+    const obj = {};
+    obj["@_lon"] = v.lng;
+    obj["@_lat"] = v.lat;
+    obj["ele"] = v.ele;
+    outTrkpts.push(obj);
+  }
+  jsonObj.gpx.trk.trkseg.trkpt = outTrkpts;
+
+  const buildingOptions = {
+    ignoreAttributes: false,
+    format: true,
+  };
+  const builder = new XMLBuilder(buildingOptions);
+  let xmlDataStr = builder.build(jsonObj);
+
+  return xmlDataStr;
 }

@@ -1,4 +1,33 @@
-import type { LngLat } from "maplibre-gl";
+import { LngLat } from "maplibre-gl";
+
+/** 座標を扱うデータのクラス。経度・緯度・標高を持つ。 */
+export class Point {
+  constructor(public lng: number, public lat: number, public ele?: number) {}
+
+  /**
+   * 経度緯度のみの maplibregl.LngLat を返す。
+   * ただこれで変換せzにそのまま LngLat が必要とされるところへ渡しても問題ない。
+   * @returns 経度緯度のみの値
+   */
+  lnglat(): LngLat {
+    return new LngLat(this.lng, this.lat);
+  }
+}
+
+// Point のリストから LngLat のリストを生成する。
+export function lnglatsFromPoints(points: Point[]): LngLat[] {
+  const output = [];
+
+  for (const v of points) {
+    output.push(v.lnglat());
+  }
+
+  return output;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 操作関係
+////////////////////////////////////////////////////////////////////////////////
 
 /** 直線と判別する閾値。単位はラジアン。 */
 const STRAIGHT_THRESHOLD = 0.005;
@@ -8,29 +37,29 @@ const CLOSE_THRESHOLD = 0.00000005;
 
 /**
  * 直線の座標を削減する。最大で 1/max の座標数になる。
- * @param lnglat
+ * @param points
  * @param angle 直線と判定する角度。単位は度[deg]。
  * @param max
  * @returns
  */
 export function decreaseStraightPoint(
-  lnglat: LngLat[],
+  points: Point[],
   angle?: number,
   max = 5
-): LngLat[] {
+): Point[] {
   const threshold =
     angle == null ? STRAIGHT_THRESHOLD : (angle * Math.PI) / 180;
 
   let i = 0;
-  const output: LngLat[] = [];
-  output.push(lnglat[0]);
+  const output: Point[] = [];
+  output.push(points[0]);
 
-  while (i < lnglat.length - max) {
-    const p1 = lnglat[i];
+  while (i < points.length - max) {
+    const p1 = points[i];
     let j = 1;
     for (let j = 1; j <= max; j++) {
-      const p2 = lnglat[i + j];
-      const p3 = lnglat[i + j + 1];
+      const p2 = points[i + j];
+      const p3 = points[i + j + 1];
 
       const rad1 = Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat);
       const rad2 = Math.atan2(p3.lng - p1.lng, p3.lat - p1.lat);
@@ -54,22 +83,21 @@ export function decreaseStraightPoint(
   return output;
 }
 
-// 近接した座標を削除する。
 /**
- *
- * @param lnglat 座標のリスト
+ * 近接した座標を削除する。
+ * @param points 座標のリスト
  * @param dist 近接判定とするおよその距離(メートル)
  * @returns 座標のリスト
  */
-export function decreaseClosePoint(lnglat: LngLat[], dist?: number): LngLat[] {
-  const output: LngLat[] = [];
+export function decreaseClosePoint(points: Point[], dist?: number): Point[] {
+  const output: Point[] = [];
   let flag = false; // 前回のループでスキップしたかどうかのフラグ。近接が連続したときに消えすぎないようにする。
   const threshold = dist == null ? CLOSE_THRESHOLD : dist * dist * 0.0000000001;
 
   // 前の座標と近すぎるときにスキップする。
-  for (let i = 0; i < lnglat.length - 1; i++) {
-    const p1 = lnglat[i];
-    const p2 = lnglat[i + 1];
+  for (let i = 0; i < points.length - 1; i++) {
+    const p1 = points[i];
+    const p2 = points[i + 1];
     const d = Math.pow(p1.lng - p2.lng, 2) + Math.pow(p1.lat - p2.lat, 2);
 
     if (threshold < d || flag === true) {

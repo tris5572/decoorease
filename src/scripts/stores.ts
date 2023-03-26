@@ -1,16 +1,16 @@
-import { get, writable } from "svelte/store";
-import type { LngLat } from "maplibre-gl";
-import { isGpx, lnglatFromGpx } from "./gpx";
+import { writable } from "svelte/store";
+import { isGpx, pointsFromGpx } from "./gpx";
+import type { Point } from "./point";
 
 /** 地図に表示する座標のリスト */
 export const markerPoints = createMarkerPoints();
 
 function createMarkerPoints() {
-  const { subscribe, set, update } = writable<LngLat[]>([]);
+  const { subscribe, set, update } = writable<Point[]>([]);
   return {
     subscribe,
-    set: (v: LngLat[]) => set(v),
-    append: (v: LngLat[]) => update((a) => [...a, ...v]),
+    set: (v: Point[]) => set(v),
+    append: (v: Point[]) => update((a) => [...a, ...v]),
     clear: () => set([]),
   };
 }
@@ -27,6 +27,18 @@ function createFitBoundsFlag() {
   };
 }
 
+/** 表示しているGPXファイルの中身。 */
+export const sourceGpx = createSourceGpx();
+
+function createSourceGpx() {
+  const { subscribe, set, update } = writable("");
+  return {
+    subscribe,
+    set: (v: string) => set(v),
+    clear: () => set(""),
+  };
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -34,7 +46,7 @@ function createFitBoundsFlag() {
  * @param lnglat 座標のリスト
  * @param fit 境界にフィットさせるか
  */
-export function setMarkerPoints(lnglat: LngLat[], fit?: boolean) {
+export function setMarkerPoints(lnglat: Point[], fit?: boolean) {
   if (fit === true) {
     fitBoundsFlag.on();
   } else {
@@ -43,13 +55,13 @@ export function setMarkerPoints(lnglat: LngLat[], fit?: boolean) {
   markerPoints.set(lnglat);
 }
 
-// 画面に表示する座標一覧を更新する。
+// GPXファイルを元に画面に反映させる。
 export function openGpx(gpx: string, fit?: boolean) {
   if (!isGpx(gpx)) {
     return;
   }
 
-  const lnglat = lnglatFromGpx(gpx);
-
+  const lnglat = pointsFromGpx(gpx);
   setMarkerPoints(lnglat, true);
+  sourceGpx.set(gpx);
 }

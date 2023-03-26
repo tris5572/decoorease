@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { decreaseClosePoint, decreaseStraightPoint } from "../scripts/lnglat";
+  import { decreaseClosePoint, decreaseStraightPoint } from "../scripts/point";
   import { markerPoints, setMarkerPoints } from "../scripts/stores";
 
   let straightAngle = 1;
