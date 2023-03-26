@@ -6,7 +6,7 @@ export class Point {
 
   /**
    * 経度緯度のみの maplibregl.LngLat を返す。
-   * ただこれで変換せzにそのまま LngLat が必要とされるところへ渡しても問題ない。
+   * ただこれで変換せずにそのまま LngLat が必要とされるところへ渡しても問題ない。
    * @returns 経度緯度のみの値
    */
   lnglat(): LngLat {
@@ -14,7 +14,12 @@ export class Point {
   }
 }
 
-// Point のリストから LngLat のリストを生成する。
+//
+/**
+ * Point のリストから LngLat のリストを生成する。
+ * @param points 変換元の Point のリスト
+ * @returns 変換後の LngLat のリスト
+ */
 export function lnglatsFromPoints(points: Point[]): LngLat[] {
   const output = [];
 
@@ -29,18 +34,18 @@ export function lnglatsFromPoints(points: Point[]): LngLat[] {
 // 操作関係
 ////////////////////////////////////////////////////////////////////////////////
 
-/** 直線と判別する閾値。単位はラジアン。 */
+/** 直線と判別する閾値のデフォルト値。単位はラジアン。 */
 const STRAIGHT_THRESHOLD = 0.005;
 
-/** 近接判定の閾値。単位は緯度経度の距離の2乗。 */
+/** 近接判定の閾値のデフォルト値。単位は緯度経度の距離の2乗。 */
 const CLOSE_THRESHOLD = 0.00000005;
 
 /**
  * 直線の座標を削減する。最大で 1/max の座標数になる。
- * @param points
- * @param angle 直線と判定する角度。単位は度[deg]。
- * @param max
- * @returns
+ * @param points 対象とする座標のリスト
+ * @param angle 直線と判定する角度[deg]
+ * @param max 最大連続削除数
+ * @returns 間引き後の座標のリスト
  */
 export function decreaseStraightPoint(
   points: Point[],
@@ -86,7 +91,7 @@ export function decreaseStraightPoint(
 /**
  * 近接した座標を削除する。
  * @param points 座標のリスト
- * @param dist 近接判定とするおよその距離(メートル)
+ * @param dist 近接判定とするおよその距離[m]
  * @returns 座標のリスト
  */
 export function decreaseClosePoint(points: Point[], dist?: number): Point[] {
