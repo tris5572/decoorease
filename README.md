@@ -1,47 +1,40 @@
-# Svelte + TS + Vite
+# Decoorease
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+[Decoorease](http://tris5572.github.io/decoorease/)は、GPXファイルの座標数を削減するWebアプリです。何らかの理由（デバイスに読み込ませる際に制限がある等）でGPXファイルを小さくしたいときに利用できます。
 
-## Recommended IDE Setup
+# 使い方
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+## 手順
 
-## Need an official Svelte framework?
+1. ページにアクセスし、GPXファイルをウィンドウにドラッグ&ドロップします。これにより地図上にGPXの座標が表示されます。
+2. 画面右のボタン操作によりポイントを削減します。その際、削減方法と閾値を設定できます。
+3. 座標数が削減されたGPXファイルをダウンロードします。
+4. デバイスに転送するなどして利用します👍
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## 削減方法
 
-## Technical considerations
+### 直線削減
 
-**Why use this over SvelteKit?**
+連続して直線状に並んだ座標を削減します。直線と判定する角度と、何個までを連続と判定するか（最大で1/n個になるか）の値を設定します。
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+### 近接削減
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+近接した座標を削減します。1回の操作で、近接した座標同士の片方を削除します。
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+近接判定とする距離を設定できますが、非常に簡易的な計算を行っているため誤差があります。当該地点の緯度と座標間の方角により、最大で10%程度のブレが生じます。
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+## 想定するユースケース
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+### Ride with GPS でルートを作成し、出力したGPXファイルを削減する。
 
-**Why include `.vscode/extensions.json`?**
+この場合、デフォルト値のままで直線削減→近接削減を行えば、（ルートの形状にもよりますが）およそ半分の座標数になります。
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+これが主に想定する使い方です。
 
-**Why enable `allowJs` in the TS template?**
+### 実際に走行して取得したログのGPXファイルを削減する。
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+どのデバイスで取得した走行ログかによって大きく左右されますが、直線削減後に複数回の近接削減を行えば、1/4以下にまで削減されます。
 
-**Why is HMR not preserving my local component state?**
+# 制限等
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
-```
+GPXファイルの構造を決め打ちしたコードになっているため、ファイルによっては正常に動作しない恐れがあります。
