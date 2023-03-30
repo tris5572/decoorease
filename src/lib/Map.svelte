@@ -55,10 +55,6 @@
     <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
       <circle cx="5" cy="5" r="4" class="marker-circle" />
     </svg>`;
-    // el.innerHTML = `
-    // <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
-    //   <circle cx="5" cy="5" r="4" stroke="blue" stroke-width="2" fill="none" />
-    // </svg>`;
 
     return el;
   }
@@ -78,9 +74,6 @@
 <style>
   /* 画面いっぱいに地図を表示する */
   #map {
-    /* position: fixed;
-    top: 0;
-    left: 0; */
     width: 100%;
     height: 100dvh;
   }
@@ -91,7 +84,7 @@
     height: 10px;
   }
   :global(.marker-circle) {
-    stroke: hsl(180, 89%, 35%);
+    stroke: hsla(180, 89%, 35%, 0.6);
     fill: hsla(180, 100%, 50%, 0.2);
     stroke-width: 2px;
   }
