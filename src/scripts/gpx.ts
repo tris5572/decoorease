@@ -3,8 +3,6 @@ import { get } from "svelte/store";
 import { Point } from "./point";
 import { markerPoints, sourceGpx } from "./stores";
 
-export function updateGpxByDroppedFile() {}
-
 /**
  * GPXファイルから座標(Point)のリストを生成する。
  * @param gpx GPXファイルの中身の文字列
@@ -26,7 +24,11 @@ export function pointsFromGpx(gpx: string): Point[] {
   // trkpt を座標として出力用へ格納。
   for (const a of array) {
     points.push(
-      new Point(Number(a["@_lon"]), Number(a["@_lat"]), Number(a["ele"]))
+      new Point(
+        Number(a["@_lon"]),
+        Number(a["@_lat"]),
+        a["ele"] ? Number(a["ele"]) : undefined
+      )
     );
   }
 
@@ -44,7 +46,7 @@ export function isGpx(gpx: string): boolean {
 
   // {} が返ってきたらXMLではない。
   if (Object.keys(jsonObj).length === 0) {
-    console.log("XMLファイルではないと判定されました。");
+    // console.log("XMLファイルではないと判定されました。");
     return false;
   }
 
@@ -55,7 +57,7 @@ export function isGpx(gpx: string): boolean {
     }
   }
 
-  console.log("GPXファイルではないと判定されました。");
+  // console.log("GPXファイルではないと判定されました。");
   return false;
 }
 
