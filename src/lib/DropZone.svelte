@@ -1,8 +1,6 @@
 <script lang="ts">
   import { openGpx } from "../scripts/stores";
 
-  // import { changeGpx } from "../scripts/stores";
-
   // ファイルをドロップするためのドロップゾーン。
   // ウィンドウ内にファイルをドラッグするとゾーンを有効化し、
   // ドラッグがゾーンの外に出たらゾーンを無効化する。
@@ -65,7 +63,6 @@
    * @param file
    */
   async function readFile(file: File) {
-    // changeGpx(await file.text(), true);
     openGpx(await file.text(), true);
     // console.log("Dropped.");
   }
