@@ -1,7 +1,15 @@
 <script lang="ts">
-  import maplibregl, { LngLatBounds, Map, Marker } from "maplibre-gl";
+  import maplibregl, {
+    GeoJSONSource,
+    LngLatBounds,
+    Map,
+    Marker,
+  } from "maplibre-gl";
   import { onMount } from "svelte";
+  import { lnglatValuesFromPoints } from "../scripts/point";
   import { fitBoundsFlag, markerPoints } from "../scripts/stores";
+
+  const MARKER_LINE_ID = "marker_line";
 
   let map: Map;
   const markers: Marker[] = [];
@@ -18,6 +26,35 @@
 
     // 拡大縮小コントロールを表示する。
     map.addControl(new maplibregl.NavigationControl({}));
+
+    // 線を初期化する。
+    // 初期状態では線自体は描画しないが、HMR時には描画する。
+    map.on("load", () => {
+      map.addSource(MARKER_LINE_ID, {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: lnglatValuesFromPoints($markerPoints),
+          },
+        },
+      });
+      map.addLayer({
+        id: MARKER_LINE_ID,
+        type: "line",
+        source: MARKER_LINE_ID,
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": "hsla(180, 89%, 35%, 0.6)",
+          "line-width": 2,
+        },
+      });
+    });
   });
 
   // 表示する座標を更新する。
@@ -33,12 +70,18 @@
 
       // マーカーを表示する。
       for (const ll of $markerPoints) {
-        const marker = new Marker({ element: markerElement() })
+        const marker = new Marker({
+          element: markerElement(),
+          offset: [0, -4], // なぜか下にズレるのでオフセット
+        })
           .setLngLat(ll)
           .addTo(map);
         markers.push(marker);
         bounds.extend(ll.lnglat());
       }
+
+      // 線の表示を更新する。
+      updateLine();
 
       // 表示をフィットさせる。
       if (!bounds.isEmpty() && $fitBoundsFlag) {
@@ -57,6 +100,22 @@
     </svg>`;
 
     return el;
+  }
+
+  // 描画する線を更新する。
+  function updateLine() {
+    if (map == null || $markerPoints.length === 0) {
+      return;
+    }
+
+    (map.getSource(MARKER_LINE_ID) as GeoJSONSource)?.setData({
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: lnglatValuesFromPoints($markerPoints),
+      },
+    });
   }
 </script>
 
@@ -82,6 +141,7 @@
     padding: 0;
     width: 10px;
     height: 10px;
+    vertical-align: middle;
   }
   :global(.marker-circle) {
     stroke: hsla(180, 89%, 35%, 0.6);

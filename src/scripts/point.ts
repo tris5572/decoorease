@@ -30,6 +30,21 @@ export function lnglatsFromPoints(points: Point[]): LngLat[] {
   return output;
 }
 
+/**
+ * 座標のリストを、`[lng, lat]` のリストに変換する。
+ * @param points 座標のリスト
+ * @returns 経度・緯度のタプルのリスト
+ */
+export function lnglatValuesFromPoints(points: Point[]): [number, number][] {
+  const output = [];
+
+  for (const v of points) {
+    output.push([v.lng, v.lat]);
+  }
+
+  return output;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // 操作関係
 ////////////////////////////////////////////////////////////////////////////////
