@@ -67,6 +67,7 @@ export function decreaseStraightPoint(
   angle?: number,
   max = 5
 ): Point[] {
+  // 角度の閾値を度からラジアンに変換。
   const threshold =
     angle == null ? STRAIGHT_THRESHOLD : (angle * Math.PI) / 180;
 
@@ -74,16 +75,30 @@ export function decreaseStraightPoint(
   const output: Point[] = [];
   output.push(points[0]);
 
-  while (i < points.length - max) {
+  while (true) {
+    // 末尾に達したときはループ終了。
+    if (i === points.length - 1) {
+      output.push(points[points.length - 1]);
+      return output;
+    }
+
     const p1 = points[i];
     let j = 1;
+
     for (let j = 1; j <= max; j++) {
+      // 末尾に達したときはそこで完了。
+      if (points.length <= i + j + 1) {
+        output.push(points[points.length - 1]);
+        return output;
+      }
+
       const p2 = points[i + j];
       const p3 = points[i + j + 1];
 
       const rad1 = Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat);
       const rad2 = Math.atan2(p3.lng - p1.lng, p3.lat - p1.lat);
 
+      // 角度の差分が閾値より小さいことを判定。
       if (Math.abs(rad1 - rad2) < threshold) {
         // 角度が閾値より小さいときは直線として引き続き読み飛ばす。
         // ただし j が max に達しているときはそこでひとまず完了とする。
