@@ -119,27 +119,31 @@ export function decreaseStraightPoint(
 }
 
 /**
- * 近接した座標を削除する。
+ * 近接した座標を削除する。近接した座標の片方を削除する。
  * @param points 座標のリスト
  * @param dist 近接判定とするおよその距離[m]
  * @returns 座標のリスト
  */
 export function decreaseClosePoint(points: Point[], dist?: number): Point[] {
   const output: Point[] = [];
-  let flag = false; // 前回のループでスキップしたかどうかのフラグ。近接が連続したときに消えすぎないようにする。
+  let flag = false; // 次回のループでスキップするかどうかのフラグ。
   const threshold = dist == null ? CLOSE_THRESHOLD : dist * dist * 0.0000000001;
 
-  // 前の座標と近すぎるときにスキップする。
   for (let i = 0; i < points.length - 1; i++) {
     const p1 = points[i];
     const p2 = points[i + 1];
     const d = Math.pow(p1.lng - p2.lng, 2) + Math.pow(p1.lat - p2.lat, 2);
 
-    if (threshold < d || flag === true) {
-      // 距離が遠いか、前回スキップしていれば出力対象。
-      output.push(p1);
+    if (flag === true) {
+      // フラグが立っているときは追加せず、フラグを無効化。
       flag = false;
-    } else {
+      continue;
+    }
+
+    output.push(p1);
+
+    // 次までの距離が近いときは、次を出力対象外へ。
+    if (d < threshold) {
       flag = true;
     }
   }
